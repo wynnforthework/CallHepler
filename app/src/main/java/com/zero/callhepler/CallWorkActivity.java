@@ -1,9 +1,13 @@
 package com.zero.callhepler;
 
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.WindowManager;
 
 import com.zero.callhelper.lib.CallHelper;
@@ -12,7 +16,9 @@ import com.zero.callhelper.lib.CallHelper;
  * created by Lin on 2017/12/16
  */
 
-public class CallWorkActivity extends Activity {
+public class CallWorkActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback {
+
+    private final int ANSWER_PHONE_CALLS_STATE=1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -22,8 +28,14 @@ public class CallWorkActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-        
-        mMainHandler.postDelayed(mRunnable, 1000);
+
+        int permissionCheck = ContextCompat.checkSelfPermission(this, "android.permission.ANSWER_PHONE_CALLS");
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.ANSWER_PHONE_CALLS"}, ANSWER_PHONE_CALLS_STATE);
+        } else {
+            mMainHandler.postDelayed(mRunnable, 1000);
+        }
     }
 
     public enum CALL_OP {
@@ -55,4 +67,18 @@ public class CallWorkActivity extends Activity {
             CallWorkActivity.this.finish();
         }
     };
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case ANSWER_PHONE_CALLS_STATE:
+                if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    //TODO
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
 }
